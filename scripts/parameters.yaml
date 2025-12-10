@@ -1,0 +1,105 @@
+# Parameter definitions for Gray-Scott reaction-diffusion-advection
+# Based on Pearson's classification of pattern types
+# Reference: http://www.mrob.com/pub/comp/xmorphia/index.html
+
+# Domain settings
+domain:
+  size: 2.5          # Square domain side length [m]
+  resolution: 128    # Grid points per side
+
+# Time settings
+time:
+  end_time: 10000    # Total simulation time [s]
+  delta_t: 0.5       # Time step [s]
+  write_interval: 100  # Write every N timesteps
+
+# Parameter ranges for sweep
+# Total combinations: 3 * 3 * 15 * 15 * 5 * 3 = 30,375 cases
+parameters:
+  # Diffusion coefficients (typical ratio Da/Db = 2)
+  Da:
+    values: [1.0e-5, 2.0e-5, 5.0e-5]
+    unit: "m^2/s"
+    description: "Diffusivity of species A (substrate)"
+
+  Db:
+    values: [0.5e-5, 1.0e-5, 2.5e-5]
+    unit: "m^2/s"
+    description: "Diffusivity of species B (product)"
+
+  # Feed rate (f) - supply of A
+  f:
+    min: 0.01
+    max: 0.10
+    num_samples: 15
+    unit: "1/s"
+    description: "Feed rate controlling supply of species A"
+
+  # Kill rate (k) - removal of B
+  k:
+    min: 0.04
+    max: 0.07
+    num_samples: 15
+    unit: "1/s"
+    description: "Kill rate controlling removal of species B"
+
+  # Reaction coupling coefficient (C)
+  C:
+    values: [1.0]
+    unit: "1/s"
+    description: "Reaction rate constant for A + 2B -> 3B"
+
+  # Advection velocity magnitude
+  U_mag:
+    values: [0.0, 0.005, 0.01, 0.02, 0.05]
+    unit: "m/s"
+    description: "Magnitude of constant advection velocity"
+
+  # Advection velocity angle (degrees from x-axis)
+  U_angle:
+    values: [0, 45, 90]
+    unit: "degrees"
+    description: "Direction of advection velocity"
+
+# Interesting parameter regimes (from Pearson classification)
+# Use these for targeted studies of specific pattern types
+pattern_regimes:
+  spots:
+    description: "Hexagonal negaton arrays"
+    f: [0.030, 0.042]
+    k: [0.055, 0.065]
+
+  stripes:
+    description: "Worm-like branching patterns"
+    f: [0.022, 0.038]
+    k: [0.051, 0.061]
+
+  mitosis:
+    description: "Cell division-like dynamics"
+    f: [0.0367]
+    k: [0.0649]
+
+  spirals:
+    description: "Belousov-Zhabotinsky-like spirals"
+    f: [0.010, 0.014]
+    k: [0.041, 0.047]
+
+  solitons:
+    description: "Mitotic solitons, hexagonal grids"
+    f: [0.026, 0.034]
+    k: [0.061, 0.065]
+
+# Initial condition settings
+initial_conditions:
+  type: "random_patches"  # "random_patches", "central_square", "multiple_squares"
+  num_patches: 5          # Number of perturbation patches
+  patch_size: 0.2         # Size of each patch [m]
+  A_perturbation: 0.5     # A value in perturbed regions
+  B_perturbation: 0.25    # B value in perturbed regions
+
+# Output settings for ML
+output:
+  format: "numpy"         # "numpy", "vtk", "csv"
+  sample_times: "all"     # "all" or list of specific times
+  fields: ["A", "B"]
+  include_coordinates: true

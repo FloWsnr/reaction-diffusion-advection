@@ -1,0 +1,40 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Build script for Gray-Scott Advection solver
+#------------------------------------------------------------------------------
+
+cd "${0%/*}" || exit 1  # Run from this directory
+
+# Source OpenFOAM environment if not already done
+if [ -z "$WM_PROJECT_DIR" ]; then
+    if [ -f /usr/lib/openfoam/openfoam2412/etc/bashrc ]; then
+        source /usr/lib/openfoam/openfoam2412/etc/bashrc
+    elif [ -f /opt/openfoam/openfoam2412/etc/bashrc ]; then
+        source /opt/openfoam/openfoam2412/etc/bashrc
+    else
+        echo "Error: OpenFOAM environment not found"
+        echo "Please source OpenFOAM bashrc before running this script"
+        exit 1
+    fi
+fi
+
+# Parse arguments for wmake options
+. "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments
+
+echo "Building grayScottAdvectionFoam solver..."
+echo "  OpenFOAM: $WM_PROJECT_VERSION"
+echo "  Target:   $FOAM_USER_APPBIN"
+echo ""
+
+# Build the solver
+wmake $targetType applications/solvers/grayScottAdvectionFoam
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "Build successful!"
+    echo "Solver installed to: $FOAM_USER_APPBIN/grayScottAdvectionFoam"
+else
+    echo ""
+    echo "Build failed!"
+    exit 1
+fi

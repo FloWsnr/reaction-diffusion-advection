@@ -1,0 +1,48 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Clean script for Gray-Scott Advection project
+#------------------------------------------------------------------------------
+
+cd "${0%/*}" || exit 1  # Run from this directory
+
+# Source OpenFOAM environment if not already done
+if [ -z "$WM_PROJECT_DIR" ]; then
+    if [ -f /usr/lib/openfoam/openfoam2412/etc/bashrc ]; then
+        source /usr/lib/openfoam/openfoam2412/etc/bashrc
+    elif [ -f /opt/openfoam/openfoam2412/etc/bashrc ]; then
+        source /opt/openfoam/openfoam2412/etc/bashrc
+    fi
+fi
+
+echo "Cleaning grayScottAdvectionFoam solver..."
+
+# Clean solver build
+if [ -d applications/solvers/grayScottAdvectionFoam ]; then
+    wclean applications/solvers/grayScottAdvectionFoam 2>/dev/null
+fi
+
+echo "Cleaning tutorial cases..."
+
+# Clean tutorial cases
+for case in tutorials/grayScottAdvection/*; do
+    if [ -d "$case" ]; then
+        echo "  Cleaning $case..."
+        (
+            cd "$case" || exit
+            # Remove time directories
+            rm -rf [0-9]* 2>/dev/null
+            # Remove mesh
+            rm -rf constant/polyMesh 2>/dev/null
+            # Remove logs
+            rm -f log.* 2>/dev/null
+            # Remove processor directories
+            rm -rf processor* 2>/dev/null
+            # Remove postProcessing
+            rm -rf postProcessing 2>/dev/null
+            # Remove VTK
+            rm -rf VTK 2>/dev/null
+        )
+    fi
+done
+
+echo "Clean complete"
